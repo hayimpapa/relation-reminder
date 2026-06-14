@@ -7,7 +7,7 @@ import { calcNextDue, getDaysUntilDue } from './utils/dateUtils'
 
 export default function App() {
   const [view, setView] = useState('dashboard')
-  const { contacts, addContact, updateContact, deleteContact, markContacted } = useContacts()
+  const { contacts, addContact, importContacts, updateContact, deleteContact, markContacted } = useContacts()
   const { settings, saveSettings } = useSettings()
 
   const overdueCount = contacts.filter((c) => {
@@ -58,6 +58,7 @@ export default function App() {
           <Dashboard
             contacts={contacts}
             onAdd={addContact}
+            onImport={importContacts}
             onUpdate={updateContact}
             onDelete={deleteContact}
             onMarkContacted={markContacted}

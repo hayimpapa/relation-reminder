@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { calcNextDue, getDaysUntilDue, getStatusColor, formatDate, FREQUENCIES } from '../utils/dateUtils'
+import { calcNextDue, getDaysUntilDue, getStatusColor, formatDate, getMissingFields, FREQUENCIES } from '../utils/dateUtils'
 
 const STATUS_STYLES = {
   red:   { badge: 'bg-red-900/60 text-red-300 border-red-700',   border: 'border-l-red-500',   dot: 'bg-red-500'   },
@@ -25,8 +25,15 @@ export default function ContactCard({ contact, onEdit, onDelete, onMarkContacted
   const styles  = STATUS_STYLES[color]
   const freqLabel = FREQUENCIES.find((f) => f.value === contact.frequency)?.label ?? contact.frequency
 
+  const missing    = getMissingFields(contact)
+  const incomplete = missing.length > 0
+
   return (
-    <div className={`card border-l-4 ${styles.border} transition-all duration-200 hover:border-slate-600`}>
+    <div className={`card border-l-4 transition-all duration-200 hover:border-slate-600 ${
+      incomplete
+        ? 'border-l-amber-400 ring-1 ring-amber-500/30'
+        : styles.border
+    }`}>
       <div className="flex items-start gap-3">
         {/* Status dot */}
         <span className={`mt-1.5 flex-shrink-0 w-2.5 h-2.5 rounded-full ${styles.dot}`} />
@@ -43,8 +50,10 @@ export default function ContactCard({ contact, onEdit, onDelete, onMarkContacted
               )}
             </div>
             {/* Status badge */}
-            <span className={`flex-shrink-0 text-xs font-semibold border px-2.5 py-0.5 rounded-full whitespace-nowrap ${styles.badge}`}>
-              {statusLabel(days)}
+            <span className={`flex-shrink-0 text-xs font-semibold border px-2.5 py-0.5 rounded-full whitespace-nowrap ${
+              incomplete ? STATUS_STYLES.amber.badge : styles.badge
+            }`}>
+              {incomplete ? 'Needs details' : statusLabel(days)}
             </span>
           </div>
 
@@ -66,25 +75,45 @@ export default function ContactCard({ contact, onEdit, onDelete, onMarkContacted
             )}
           </div>
 
+          {/* Missing-details notice */}
+          {incomplete && (
+            <div className="mt-2 flex items-center gap-1.5 text-xs bg-amber-900/30 border border-amber-800 text-amber-300 rounded-lg px-2.5 py-1.5">
+              <WarnIcon />
+              <span>Missing: {missing.map((f) => f.label).join(', ')}</span>
+            </div>
+          )}
+
           {contact.notes && (
             <p className="mt-2 text-sm text-slate-400 line-clamp-2 leading-snug">{contact.notes}</p>
           )}
 
           {/* Actions */}
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            <button
-              onClick={() => onMarkContacted(contact.id)}
-              className="btn-primary text-sm py-1.5 px-3 flex items-center gap-1.5"
-            >
-              <CheckIcon />
-              Mark contacted today
-            </button>
-            <button
-              onClick={() => onEdit(contact)}
-              className="btn-ghost text-sm py-1.5"
-            >
-              Edit
-            </button>
+            {incomplete ? (
+              <button
+                onClick={() => onEdit(contact)}
+                className="btn-primary text-sm py-1.5 px-3 flex items-center gap-1.5"
+              >
+                <PencilIcon />
+                Add details
+              </button>
+            ) : (
+              <button
+                onClick={() => onMarkContacted(contact.id)}
+                className="btn-primary text-sm py-1.5 px-3 flex items-center gap-1.5"
+              >
+                <CheckIcon />
+                Mark contacted today
+              </button>
+            )}
+            {!incomplete && (
+              <button
+                onClick={() => onEdit(contact)}
+                className="btn-ghost text-sm py-1.5"
+              >
+                Edit
+              </button>
+            )}
             {confirmDelete ? (
               <>
                 <button
@@ -142,6 +171,20 @@ function CheckIcon() {
   return (
     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7"/>
+    </svg>
+  )
+}
+function WarnIcon() {
+  return (
+    <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+    </svg>
+  )
+}
+function PencilIcon() {
+  return (
+    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
     </svg>
   )
 }

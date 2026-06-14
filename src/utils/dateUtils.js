@@ -57,3 +57,25 @@ export function formatDate(isoString) {
 export function todayIso() {
   return format(new Date(), 'yyyy-MM-dd')
 }
+
+// Labels for the details required before a contact gets reminders.
+export const REQUIRED_FIELDS = [
+  { key: 'frequency',     label: 'Contact frequency' },
+  { key: 'lastContacted', label: 'Last contacted'    },
+]
+
+// Returns the list of required fields a contact is still missing.
+export function getMissingFields(contact) {
+  const missing = []
+  if (!contact.frequency) {
+    missing.push(REQUIRED_FIELDS[0])
+  }
+  if (!contact.lastContacted || !isValid(parseISO(contact.lastContacted))) {
+    missing.push(REQUIRED_FIELDS[1])
+  }
+  return missing
+}
+
+export function isIncomplete(contact) {
+  return getMissingFields(contact).length > 0
+}

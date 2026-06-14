@@ -101,6 +101,7 @@ export default function ContactModal({ contact, onSave, onClose }) {
               value={form.frequency}
               onChange={(e) => set('frequency', e.target.value)}
             >
+              <option value="" disabled>Choose how often…</option>
               {FREQUENCIES.map((f) => (
                 <option key={f.value} value={f.value}>{f.label}</option>
               ))}
