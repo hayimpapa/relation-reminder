@@ -9,6 +9,7 @@ Built with React + Vite + Tailwind CSS. All data is stored in `localStorage` —
 ## Features
 
 - **Contact management** — add, edit, and delete contacts with name, category, contact frequency, notes, and last-contacted date
+- **CSV import** — bulk-add people from a CSV of names; contacts missing details are highlighted so you can fill them in later
 - **Auto-calculated next due date** — computed from last contacted + chosen frequency
 - **Dashboard** — contacts sorted by most overdue first, with red / amber / green colour coding
 - **"Mark contacted today"** — one-click reset of the last-contacted date
@@ -40,6 +41,40 @@ Open [http://localhost:5173](http://localhost:5173).
 npm run build
 npm run preview   # preview the production build locally
 ```
+
+---
+
+## Importing contacts from CSV
+
+Adding people one at a time is slow, so you can bulk-import them instead.
+
+1. On the **Dashboard**, click **Import CSV** and choose your file.
+2. Each imported person is added to your list and flagged **"Needs details"** — they show an amber highlight and a **Missing:** notice until you set a contact frequency and last-contacted date.
+3. Click **Add details** on a highlighted card (or use the **"Show only … needing details"** filter to focus on them) and complete the missing fields.
+
+### Accepted formats
+
+The simplest file is just **one name per line**:
+
+```
+Jane Smith
+John Doe
+Acme — Bob in procurement
+```
+
+You can also provide a header row to pre-fill more columns. Only `name` is
+required; any of the others are optional and may be left blank:
+
+```csv
+name,category,frequency,notes,last contacted
+Jane Smith,Friend,monthly,Met at the conference,2026-01-15
+John Doe,Networking,,,
+```
+
+- `frequency` must be one of: `weekly`, `fortnightly`, `monthly`, `quarterly`, `half-yearly`, `yearly` (anything else is ignored and left blank).
+- `last contacted` must be in `YYYY-MM-DD` format (anything else is ignored).
+- Fields containing commas can be wrapped in double quotes, e.g. `"Smith, Jane"`.
+- Duplicate names (already on your list) are skipped, and the import summary tells you how many were added vs. skipped.
 
 ---
 
